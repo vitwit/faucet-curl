@@ -16,10 +16,8 @@ import (
 
 	"errors"
 
-	"github.com/dpapathanasiou/go-recaptcha"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
 )
 
@@ -45,7 +43,6 @@ type Coins struct {
 }
 
 var chain, chain2 string
-var recaptchaSecretKey string
 var amountFaucet, fees1, fees2 string
 var amountSteak string
 var key string
@@ -83,7 +80,6 @@ func main() {
 	}
 
 	chain = getEnv("FAUCET_CHAIN")
-	recaptchaSecretKey = getEnv("FAUCET_RECAPTCHA_SECRET_KEY")
 	amountFaucet = getEnv("FAUCET_AMOUNT_FAUCET")
 	amountSteak = getEnv("FAUCET_AMOUNT_STEAK")
 	key = getEnv("FAUCET_KEY")
@@ -99,11 +95,7 @@ func main() {
 		log.Fatal("MAX_TOKENS_ALLOWED value is invalid")
 	}
 
-	recaptcha.Init(recaptchaSecretKey)
-
 	r := mux.NewRouter()
-	r.HandleFunc("/claim", getCoinsHandler).Methods(http.MethodPost)
-
 	getR := r.Methods(http.MethodGet).Subrouter()
 	getR.HandleFunc("/faucet/{address}", curlFaucetHandler).Methods(http.MethodGet)
 	getR.Use(limit)
@@ -175,40 +167,6 @@ func CheckAccountBalance(address, key, nodeAddr, chainId string) error {
 	}
 
 	return errors.New("You have enough tokens in your account")
-}
-
-func getCoinsHandler(res http.ResponseWriter, request *http.Request) {
-	address := request.FormValue("address")
-	captchaResponse := request.FormValue("response")
-
-	fmt.Println("No error", address, captchaResponse)
-
-	(res).Header().Set("Access-Control-Allow-Origin", "*")
-
-	if len(address) != ADDR_LENGTH {
-		panic("Invalid address")
-	}
-
-	// make sure captcha is valid
-	clientIP := realip.FromRequest(request)
-	captchaPassed, captchaErr := recaptcha.Confirm(clientIP, captchaResponse)
-	if captchaErr != nil {
-		panic(captchaErr)
-	}
-
-	fmt.Println("Captcha passed? ", captchaPassed)
-
-	if !captchaPassed {
-		res.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(res).Encode(ErrorResponse{
-			Status:  false,
-			Message: "Invalid captcha",
-		})
-		return
-	}
-
-	checkAndExecuteTxsHandler(address, res, request)
-	return
 }
 
 func curlFaucetHandler(res http.ResponseWriter, request *http.Request) {
