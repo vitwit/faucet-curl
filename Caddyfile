@@ -3,7 +3,7 @@ faucetcosmos.network {
     proxy / localhost:8080 {
         transparent
     }
-    ratelimit * /claim 1 1 day
+    ratelimit * /faucet 1 1 day
 }
 
 faucet.cosmos.network {
@@ -11,7 +11,7 @@ faucet.cosmos.network {
     proxy / localhost:8080 {
         transparent
     }
-    ratelimit * /claim 1 1 day
+    ratelimit * /faucet 1 1 day
 }
 
 

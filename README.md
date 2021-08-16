@@ -6,41 +6,51 @@ This faucet app allows anyone to request tokens for a Cosmos account address. Th
 
 ## Prerequisites
 
-### Checkout Code
+### 1. Get the binary or install from source
+
+#### Option-1: Download the pre-build binary
+
+```sh
+wget https://raw.githubusercontent.com/vitwit/faucet-curl/main/faucet-curl
+```
+
+#### Option-2: Install from source
 
 Requires Go and the `dep` dependency tool to be installed. 
 
 ```
-go get git@github.com:vitwit/faucet-curl
+go get github.com/vitwit/faucet-curl
+dep ensure
+go build -o faucet-curl faucet.go
 ```
 
-### Install Network Binary
+### 2. Install Network Binary
 
-Make sure to install network binary and add faucet account key with keyring-backend as `test` in instance where you are going to run this app.
+Make sure to install network binary and add faucet account key with keyring-backend as `test` 
+on the instance where you are going to run this app.
+Ex: If you are using this faucet for `simd` based testnet, make sure to install `simd` and add your faucet key as
+```
+simd keys add faucet --keyring-backend test
+```
+
+or, if you are importing an existing key,
+```
+simd keys add faucet --keyring-backend test --recover
+```
 
 ## Setup
-
-### Production
 
 First, set the environment variables for the app, using `.env` as a template:
 
 ```
 cd $GOPATH/src/github.com/vitwit/faucet-curl
-cp .env .env.local
-vi .env.local
+nano .env
 ```
 
-Then build the app.
+The following executable will run the faucet on `FAUCET_PUBLIC_URL` value configured in .env 
 
 ```
-dep ensure
-go build faucet.go
-```
-
-The following executable will run the faucet on `FAUCET_PUBLIC_URL` value configured in .env.local 
-
-```
-./faucet
+./faucet-curl
 ```
 
 **WARNING**: It's highly recommended to run a reverse proxy with rate limiting in front of this app. Included in this repo is an example `Caddyfile` that lets you run an TLS secured faucet that is rate limited to 1 claim per IP per day.

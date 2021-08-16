@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -13,8 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"errors"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -29,6 +28,7 @@ type ErrorResponse struct {
 
 type SuccessResponse struct {
 	Status bool        `json:"status"`
+	Message string      `json:"message"`
 	Data   interface{} `json:"data"`
 }
 
@@ -42,21 +42,13 @@ type Coins struct {
 	Amount string `json:"amount"`
 }
 
-var chain, chain2 string
-var amountFaucet, fees1, fees2 string
-var amountSteak string
+var chain string
+var amountFaucet, fees string
 var key string
-var node, node2 string
+var node string
 var publicUrl string
 var maxTokens float64
 var cliName string
-
-const ADDR_LENGTH int = 44
-
-type claim_struct struct {
-	Address  string `json:"address"`
-	Response string `json:"response"`
-}
 
 // Run a background goroutine to remove old entries from the visitors map.
 func init() {
@@ -74,22 +66,18 @@ func getEnv(key string) string {
 }
 
 func main() {
-	err := godotenv.Load(".env.local", ".env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	chain = getEnv("FAUCET_CHAIN")
-	amountFaucet = getEnv("FAUCET_AMOUNT_FAUCET")
-	amountSteak = getEnv("FAUCET_AMOUNT_STEAK")
+	amountFaucet = getEnv("FAUCET_AMOUNT")
 	key = getEnv("FAUCET_KEY")
 	node = getEnv("FAUCET_NODE")
 	publicUrl = getEnv("FAUCET_PUBLIC_URL")
 	cliName = getEnv("CLI_NAME")
-	node2 = getEnv("FAUCET_NODE_2")
-	chain2 = getEnv("FAUCET_CHAIN_2")
-	fees1 = getEnv("FEES_1")
-	fees2 = getEnv("FEES_2")
+	fees = getEnv("FEES")
 	maxTokens, err = strconv.ParseFloat(getEnv("MAX_TOKENS_ALLOWED"), 64)
 	if err != nil {
 		log.Fatal("MAX_TOKENS_ALLOWED value is invalid")
@@ -189,32 +177,11 @@ func checkAndExecuteTxsHandler(address string, res http.ResponseWriter, request 
 		// send the coins!
 		sendFaucet := fmt.Sprintf(
 			"%s tx bank send %v %v %v --from %v --node %v --chain-id %v --fees %s --keyring-backend test -y",
-			cliName, key, address, amountFaucet, key, node, chain, fees1)
+			cliName, key, address, amountFaucet, key, node, chain, fees)
 		fmt.Println(time.Now().UTC().Format(time.RFC3339), sendFaucet)
 
 		executeCmd(sendFaucet)
 		errMsg = fmt.Sprintf("%s: Successfully sent tokens to  %s", chain, address)
-	}
-
-	// Chain 2 faucet
-	if node2 != "" {
-		//check account balance
-		err = CheckAccountBalance(address, key, node2, chain2)
-
-		if err != nil {
-			isError = true
-			errMsg = fmt.Sprintf("%s, %s: %s", errMsg, chain2, err.Error())
-		} else {
-			// send the coins!
-			sendFaucet := fmt.Sprintf(
-				"%s tx bank send %v %v %v --from %v --node %v --chain-id %v --fees %s --keyring-backend test -y",
-				cliName, key, address, amountFaucet, key, node2, chain2, fees2)
-			fmt.Println(time.Now().UTC().Format(time.RFC3339), sendFaucet)
-
-			executeCmd(sendFaucet)
-			errMsg = fmt.Sprintf("%s, %s: Successfully sent tokens to  %s", errMsg, chain2, address)
-
-		}
 	}
 
 	// If there is eror in any of chains,then this will be executed
@@ -231,7 +198,8 @@ func checkAndExecuteTxsHandler(address string, res http.ResponseWriter, request 
 	res.WriteHeader(http.StatusOK)
 	json.NewEncoder(res).Encode(SuccessResponse{
 		Status: true,
-		Data:   address,
+		Message: errMsg,
+		Data:   amountFaucet,
 	})
 
 	return

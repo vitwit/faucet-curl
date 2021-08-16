@@ -2,54 +2,26 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:6467408dac43bfd94ebdca590ca1eacb58268e07bfd7793ea4e8d4d0f97005c1"
-  name = "github.com/dpapathanasiou/go-recaptcha"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "0e9736be20f9b0ca229b8f5eaf8305858a160994"
-
-[[projects]]
-  digest = "1:6078383dbb7405bfa3ce16957f37564e3b716afa29b6eb45ffdb6674624d1e0d"
   name = "github.com/gorilla/mux"
   packages = ["."]
-  pruneopts = "UT"
   revision = "98cb6bf42e086f6af920b965c38cacc07402d51b"
   version = "v1.8.0"
 
 [[projects]]
-  digest = "1:70e697d67ccaec45e16bac3a32380ebcd9e7e071079c60d0171d42cf1cf9748a"
   name = "github.com/joho/godotenv"
   packages = ["."]
-  pruneopts = "UT"
   revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:30d7b01d02b2705c10274b5110968918c9e3a5a52dae90b40463f6923becd52a"
-  name = "github.com/tomasen/realip"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f0c99a92ddcedd3964a269d23c8e89d9a9229be6"
-
-[[projects]]
-  branch = "master"
-  digest = "1:2d1ac98818624b5d4ca0b6c47fb7a3afd988c7d0ef7cfd13942176a450748b3b"
   name = "golang.org/x/time"
   packages = ["rate"]
-  pruneopts = "UT"
   revision = "1f47c861a9ac5a6e7645609f91b895398ff31642"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/dpapathanasiou/go-recaptcha",
-    "github.com/gorilla/mux",
-    "github.com/joho/godotenv",
-    "github.com/tomasen/realip",
-    "golang.org/x/time/rate",
-  ]
+  inputs-digest = "366b76ba208650fbfd98a8de1053f826420cf1aa0229fb0f8a43069f5b3de1a4"
   solver-name = "gps-cdcl"
   solver-version = 1
