@@ -11,7 +11,7 @@ This faucet app allows anyone to request tokens for a Cosmos account address. Th
 #### Option-1: Download the pre-build binary
 
 ```sh
-wget https://raw.githubusercontent.com/vitwit/faucet-curl/main/faucet-curl
+wget https://github.com/vitwit/faucet-curl/blob/main/faucet-curl?raw=true
 ```
 
 #### Option-2: Install from source
